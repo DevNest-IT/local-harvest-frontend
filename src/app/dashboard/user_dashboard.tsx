@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Typewriter } from 'react-simple-typewriter';
 import LoginBox from "@/app/dashboard/login/loginbox";// ✅ fix path if needed
 import SearchFilter from "@/app/component/serch_filter"; // optional
+import Link from "next/link";
 
 export default function Dashboard() {
     // ✅ This is a valid place to call hooks
@@ -63,6 +64,9 @@ export default function Dashboard() {
                     <LoginBox/>
                 </main>
             )}
+            <Link href="/shop_Admin_Dashboard">
+                Shop_Admin_Woner
+            </Link>
 
             {/* Footer */}
             <footer className="bg-white text-center text-sm py-4 shadow-inner mt-auto">
