@@ -3,10 +3,10 @@
 
 
 import { Package, TrendingUp, Users } from "lucide-react";
-
+import ShopProfile from "@/app/shop_Admin_Dashboard/profile/showprofile";
 
 import FarmerHeader from "@/app/shop_Admin_Dashboard/header";
-
+import InventoryTabs from "@/app/shop_Admin_Dashboard/inventorytabs";
 
 export default function InventoryPage() {
     return (
@@ -14,7 +14,10 @@ export default function InventoryPage() {
             <FarmerHeader />
 
             <main className="px-6 py-6">
+
                 <InventorySummary />
+                <InventoryTabs/>
+
                 {/* Add more sections like Fertilizer Inventory Table */}
             </main>
         </div>
