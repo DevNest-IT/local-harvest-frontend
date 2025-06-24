@@ -38,16 +38,16 @@ export default function ShopProfile() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-6 p-8 bg-white rounded-2xl shadow-md border border-gray-200">
+        <div className="w-full mt-6 p-8 bg-white rounded-2xl shadow-md border border-gray-200">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Shop Profile</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Shop Profile</h2>
                     <p className="text-gray-500 text-sm">View and manage your shop details</p>
                 </div>
                 <button
                     onClick={() => setIsEditing(prev => !prev)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
+                    className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
                 >
                     {isEditing ? (
                         <>

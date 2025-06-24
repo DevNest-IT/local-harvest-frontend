@@ -25,7 +25,6 @@ export default function InventoryPage() {
 }
 
 
-
 const summaryData = [
     {
         title: "মোট পণ্য",
@@ -67,6 +66,7 @@ const InventorySummary = () => {
                     <div>{item.icon}</div>
                 </div>
             ))}
+
         </div>
     );
 };
