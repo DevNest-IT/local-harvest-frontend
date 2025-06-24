@@ -26,12 +26,12 @@ export default function LoginBox() {
                 localStorage.setItem('user', JSON.stringify(user));
 
                 if (user.role === 'admin') {
-                    router.push('/admin_dashboard');
+                    router.push('/dashboard/admin');
                 } else if (user.role === 'shop_owner') {
                     if (user.hasProfileSetup) {
-                        router.push('/shop_Admin_Dashboard');
+                        router.push('/dashboard/shop');
                     } else {
-                        router.push('/shop_Admin_Dashboard/profile');
+                        router.push('/dashboard/shop/profile');
                     }
                 }
             } else {

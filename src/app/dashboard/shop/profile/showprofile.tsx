@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { Pencil, Save, Upload } from 'lucide-react';
 import { useEffect } from 'react';
 
-export default function shopProfile(p0: { ownerName: any; shopName: any; contactNumber: any; memberSince: any; shopAddress: any; }) {
+export default function ShopProfile() {
     const [isEditing, setIsEditing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 

@@ -3,10 +3,10 @@
 
 
 import { Package, TrendingUp, Users } from "lucide-react";
-import ShopProfile from "@/app/shop_Admin_Dashboard/profile/showprofile";
+import ShopProfile from "@/app/dashboard/shop/profile/showprofile";
 
-import FarmerHeader from "@/app/shop_Admin_Dashboard/header";
-import InventoryTabs from "@/app/shop_Admin_Dashboard/inventorytabs";
+import FarmerHeader from "@/app/dashboard/shop/header";
+import InventoryTabs from "@/app/dashboard/shop/inventorytabs";
 
 export default function InventoryPage() {
     return (
@@ -70,5 +70,3 @@ const InventorySummary = () => {
         </div>
     );
 };
-
-

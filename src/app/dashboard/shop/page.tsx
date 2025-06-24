@@ -1,4 +1,4 @@
-import InventoryPage from "@/app/shop_Admin_Dashboard/Inventory";
+import InventoryPage from "@/app/dashboard/shop/Inventory";
 
 export default function ShopAdminDashboardPage() {
     return (

@@ -64,7 +64,7 @@ export default function Dashboard() {
                     <LoginBox/>
                 </main>
             )}
-            <Link href="/shop_Admin_Dashboard">
+            <Link href="/dashboard/shop">
                 Shop_Admin_Woner
             </Link>
 
