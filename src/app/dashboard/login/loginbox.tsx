@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { login } from '@/app/services/api';
 
 
 export default function LoginBox() {
@@ -17,36 +18,32 @@ export default function LoginBox() {
         }
 
         try {
-            const res = await fetch('https://medback.site/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
+            const response = await login({ email, password });
+            const { user, access_token } = response.data;
 
-            const data = await res.json();
+            if (user && access_token) {
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('user', JSON.stringify(user));
 
-            if (res.ok) {
-                alert('Login successful!');
-                const hasLoggedInBefore = localStorage.getItem('hasLoggedInBefore');
-
-                if (!hasLoggedInBefore) {
-                    localStorage.setItem('hasLoggedInBefore', 'true');
-                    router.push('/shop_Admin_Dashboard/profile'); // first login
-                } else {
-                    router.push('/shop_Admin_Dashboard'); // repeated login
+                if (user.role === 'admin') {
+                    router.push('/admin_dashboard');
+                } else if (user.role === 'shop_owner') {
+                    if (user.hasProfileSetup) {
+                        router.push('/shop_Admin_Dashboard');
+                    } else {
+                        router.push('/shop_Admin_Dashboard/profile');
+                    }
                 }
             } else {
-                if (data.message === 'Email not registered.') {
-                    alert('Email is incorrect');
-                } else if (data.message === 'Incorrect password.') {
-                    alert('Password is incorrect');
-                } else {
-                    alert(data.message || 'Login failed');
-                }
+                alert('Login failed: Invalid response from server.');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login error:', error);
-            alert('Something went wrong. Please try again.');
+            if (error.response && error.response.data && error.response.data.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
         }
     };
 
