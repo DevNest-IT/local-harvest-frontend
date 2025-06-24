@@ -2,23 +2,54 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import RegisterBox from "@/app/dashboard/register/registerbox";
+import { useRouter } from 'next/navigation';
+
 
 export default function LoginBox() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
-    const handleLogin = () => {
+    const router = useRouter();
+    const handleLogin = async () => {
         if (!email || !password) {
             alert('Please enter both email and password');
             return;
         }
 
-        // Simulate login
-        console.log('Logging in:', { email, password });
-        // Redirect or handle auth logic
+        try {
+            const res = await fetch('https://medback.site/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert('Login successful!');
+                const hasLoggedInBefore = localStorage.getItem('hasLoggedInBefore');
+
+                if (!hasLoggedInBefore) {
+                    localStorage.setItem('hasLoggedInBefore', 'true');
+                    router.push('/shop_Admin_Dashboard/profile'); // first login
+                } else {
+                    router.push('/shop_Admin_Dashboard'); // repeated login
+                }
+            } else {
+                if (data.message === 'Email not registered.') {
+                    alert('Email is incorrect');
+                } else if (data.message === 'Incorrect password.') {
+                    alert('Password is incorrect');
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Something went wrong. Please try again.');
+        }
     };
+
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
@@ -70,7 +101,7 @@ export default function LoginBox() {
                 {/* Optional: Footer Links */}
                 <div className="text-sm text-center mt-4 text-gray-600">
                     Don’t have an account?{' '}
-                    <Link href="/registerbox" className="text-green-700 underline">
+                    <Link href="/register" className="text-green-700 underline">
                         Register
                     </Link>
 

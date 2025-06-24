@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import ShopProfile from "./profile/showprofile";
-import InventoryManagementPage from "@/app/shop_Admin_Dashboard/profile/inventoru-management";
+import InventoryManagementPage from "@/app/shop_Admin_Dashboard/inventorymanagemant/inventoru-management";
  // Adjust the path if needed
 
 const InventoryTabs = () => {
