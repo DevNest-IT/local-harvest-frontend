@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { logout } from '@/app/services/api';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -15,7 +16,15 @@ export default function AdminDashboard() {
         }
     }, [router]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await logout(token);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         router.push('/dashboard/login');

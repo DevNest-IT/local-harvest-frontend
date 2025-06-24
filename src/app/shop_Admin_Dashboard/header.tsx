@@ -2,6 +2,7 @@
 import { Typewriter } from 'react-simple-typewriter';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { logout } from '@/app/services/api';
 
 const FarmerHeader = () => {
     const router = useRouter();
@@ -14,7 +15,15 @@ const FarmerHeader = () => {
         }
     }, []);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await logout(token);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         router.push('/dashboard/login');
