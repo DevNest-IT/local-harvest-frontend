@@ -70,7 +70,7 @@ export default function Dashboard() {
 
             {/* Footer */}
             <footer className="bg-white text-center text-sm py-4 shadow-inner mt-auto">
-                © 2025 All rights reserved.I dont know you.
+                © 2025 All rights reserved.
             </footer>
         </div>
     );
