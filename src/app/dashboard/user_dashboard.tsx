@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Typewriter } from 'react-simple-typewriter';
-import LoginBox from "@/app/dashboard/login/loginbox";// ✅ fix path if needed
-import SearchFilter from "@/app/component/serch_filter"; // optional
+import LoginBox from "@/app/dashboard/login/loginbox";
+import SearchFilter from "@/app/component/serch_filter";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
-    // ✅ This is a valid place to call hooks
     const [showLogin, setShowLogin] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const handleAccessDashboard = () => {
+        if (user) {
+            if (user.role === 'admin') {
+                router.push('/dashboard/admin');
+            } else if (user.role === 'shop_owner') {
+                router.push('/dashboard/shop');
+            }
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100 text-gray-800">
@@ -37,13 +56,13 @@ export default function Dashboard() {
                     </h1>
                 </div>
 
-                {/* Login Button (top right) */}
+                {/* Login/Access Dashboard Button (top right) */}
                 {!showLogin && (
                     <button
-                        onClick={() => setShowLogin(true)}
+                        onClick={user ? handleAccessDashboard : () => setShowLogin(true)}
                         className="absolute top-4 right-6 bg-white text-green-800 px-4 py-2 rounded-md shadow hover:bg-gray-100"
                     >
-                        Login
+                        {user ? 'Access Dashboard' : 'Login'}
                     </button>
                 )}
             </header>

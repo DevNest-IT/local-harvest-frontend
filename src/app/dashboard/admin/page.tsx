@@ -10,7 +10,14 @@ export default function AdminDashboard() {
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const user = JSON.parse(storedUser);
+            if (user.role === 'admin') {
+                setUser(user);
+            } else if (user.role === 'shop_owner') {
+                router.push('/dashboard/shop');
+            } else {
+                router.push('/dashboard/login');
+            }
         } else {
             router.push('/dashboard/login');
         }
