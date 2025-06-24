@@ -4,6 +4,6 @@ export default function App(){
 
 
     return(
-        <ShopProfile/>
+        <ShopProfile ownerName={undefined} shopName={undefined} contactNumber={undefined} memberSince={undefined} shopAddress={undefined}/>
     );
 }

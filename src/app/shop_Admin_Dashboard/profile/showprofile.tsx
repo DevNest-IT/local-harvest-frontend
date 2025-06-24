@@ -2,18 +2,53 @@
 
 import { useState, useRef } from 'react';
 import { Pencil, Save, Upload } from 'lucide-react';
+import { useEffect } from 'react';
 
-export default function ShopProfile() {
+export default function shopProfile(p0: { ownerName: any; shopName: any; contactNumber: any; memberSince: any; shopAddress: any; }) {
     const [isEditing, setIsEditing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [profile, setProfile] = useState({
-        ownerName: 'Mr. Kamal Ahmed',
-        shopName: 'Kamal Agro Solutions',
-        contactNumber: '+8801712345678',
-        memberSince: '2024-01-15',
-        shopAddress: '123, Krishi Road, Farmgate, Dhaka 1215, Bangladesh',
+        ownerName: '',
+        shopName: '',
+        contactNumber: '',
+        memberSince: '',
+        shopAddress: '',
     });
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch('https://medback.site/api/shop_owner/shop-profile', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add 'Authorization' header if needed
+                    },
+                });
+
+                if (!res.ok) throw new Error('Failed to fetch profile');
+
+                const data = await res.json();
+
+                setProfile({
+                    ownerName: data.ownerName,
+                    shopName: data.shopName,
+                    contactNumber: data.contactNumber,
+                    memberSince: data.memberSince,
+                    shopAddress: data.shopAddress,
+                });
+
+                if (data.profileImage) setProfileImage(data.profileImage);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Could not load profile');
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
 
     const [profileImage, setProfileImage] = useState<string | null>(null);
 
