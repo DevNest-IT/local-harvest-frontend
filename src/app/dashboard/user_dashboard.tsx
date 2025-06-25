@@ -83,9 +83,7 @@ export default function Dashboard() {
                     <LoginBox/>
                 </main>
             )}
-            <Link href="/dashboard/shop">
-                Shop_Admin_Woner
-            </Link>
+
 
             {/* Footer */}
             <footer className="bg-white text-center text-sm py-4 shadow-inner mt-auto">

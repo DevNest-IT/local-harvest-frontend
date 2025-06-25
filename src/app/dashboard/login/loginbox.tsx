@@ -31,6 +31,7 @@ export default function LoginBox() {
                     if (user.hasProfileSetup) {
                         router.push('/dashboard/shop');
                     } else {
+
                         router.push('/dashboard/shop/profile');
                     }
                 }
