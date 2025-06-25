@@ -1,8 +1,5 @@
-import Dashboard from "@/app/dashboard/page";
-export default function mainDashboard(){
+import UserDashboard from "@/app/dashboard/user_dashboard";
 
-
-    return(
-        <Dashboard/>
-    );
+export default function MainDashboard() {
+    return <UserDashboard />;
 }
