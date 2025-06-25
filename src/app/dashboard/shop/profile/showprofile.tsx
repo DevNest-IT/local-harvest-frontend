@@ -72,6 +72,7 @@ export default function ShopProfile() {
         fileInputRef.current?.click();
     };
 
+
     return (
         <div className="w-full mt-6 p-8 bg-white rounded-2xl shadow-md border border-gray-200">
             {/* Header */}

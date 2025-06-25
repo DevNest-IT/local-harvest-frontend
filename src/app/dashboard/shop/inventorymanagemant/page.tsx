@@ -1,4 +1,4 @@
-import InventoryTable from "@/app/dashboard/shop/inventorymanagemant/inventoru-management";
+import InventoryTable from "@/app/dashboard/shop/inventorymanagemant/inventory-management";
 
 export default function App(){
 
