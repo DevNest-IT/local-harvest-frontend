@@ -1,5 +1,5 @@
 'use client';
-import { UserPlus, SlidersHorizontal, LogOut } from 'lucide-react';
+import { UserPlus, SlidersHorizontal, LogOut, LayoutDashboard } from 'lucide-react';
 
 interface AdminSidebarProps {
     activeView: string;
@@ -14,6 +14,13 @@ export const AdminSidebar = ({ activeView, setActiveView, handleLogout }: AdminS
                 Admin Panel
             </div>
             <nav className="flex-1 p-4 space-y-2">
+                <button
+                    onClick={() => setActiveView('dashboard')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition ${activeView === 'dashboard' ? 'bg-slate-700' : 'hover:bg-slate-700'}`}
+                >
+                    <LayoutDashboard size={20} />
+                    <span>Dashboard</span>
+                </button>
                 <button
                     onClick={() => setActiveView('create-shop')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition ${activeView === 'create-shop' ? 'bg-slate-700' : 'hover:bg-slate-700'}`}

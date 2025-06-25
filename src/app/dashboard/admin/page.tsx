@@ -6,11 +6,12 @@ import { AdminSidebar } from './components/AdminSidebar';
 import { AdminHeader } from './components/AdminHeader';
 import { CreateUserForm } from './components/CreateUserForm';
 import { PlaceholderContent } from './components/PlaceholderContent';
+import { DashboardOverview } from './components/DashboardOverview';
 
 export default function AdminDashboard() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
-    const [activeView, setActiveView] = useState('create-shop');
+    const [activeView, setActiveView] = useState('dashboard');
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -42,12 +43,14 @@ export default function AdminDashboard() {
 
     const renderContent = () => {
         switch (activeView) {
+            case 'dashboard':
+                return <DashboardOverview />;
             case 'create-shop':
                 return <CreateUserForm />;
             case 'fertilizer-control':
                 return <PlaceholderContent title="Master Fertilizer Control" />;
             default:
-                return <CreateUserForm />;
+                return <DashboardOverview />;
         }
     };
 

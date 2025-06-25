@@ -27,4 +27,12 @@ export const createUser = (data: any, token: string) => {
   });
 };
 
+export const getDashboardSummary = (token: string) => {
+  return apiClient.get('/admin/admin-dashboard-summary', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export default apiClient;
