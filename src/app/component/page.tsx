@@ -1,6 +1,7 @@
+'use client';
 import SearchFilter from "@/app/component/serch_filter";
 
-export default function components() {
+export default function Components() {
     const handleSearch = (query: string) => {
         console.log('Search:', query);
         // filter your data here
