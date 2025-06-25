@@ -35,4 +35,42 @@ export const getDashboardSummary = (token: string) => {
   });
 };
 
+// Fertilizer API
+export const getFertilizers = (token: string) => {
+    return apiClient.get('/admin/fertilizers', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const getFertilizerDetails = (id: number, token: string) => {
+    return apiClient.get(`/admin/fertilizers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const addFertilizer = (data: FormData, token: string) => {
+    return apiClient.post('/admin/add-fertilizers', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
+export const updateFertilizer = (id: number, data: FormData, token: string) => {
+    return apiClient.post(`/admin/fertilizers/edit/${id}`, data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
+export const deleteFertilizer = (id: number, token: string) => {
+    return apiClient.delete(`/admin/fertilizers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+
 export default apiClient;

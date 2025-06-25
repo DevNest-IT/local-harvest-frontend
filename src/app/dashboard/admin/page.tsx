@@ -7,6 +7,7 @@ import { AdminHeader } from './components/AdminHeader';
 import { CreateUserForm } from './components/CreateUserForm';
 import { PlaceholderContent } from './components/PlaceholderContent';
 import { DashboardOverview } from './components/DashboardOverview';
+import { FertilizerControl } from './components/FertilizerControl';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
             case 'create-shop':
                 return <CreateUserForm />;
             case 'fertilizer-control':
-                return <PlaceholderContent title="Master Fertilizer Control" />;
+                return <FertilizerControl />;
             default:
                 return <DashboardOverview />;
         }
