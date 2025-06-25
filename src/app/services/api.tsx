@@ -19,4 +19,12 @@ export const logout = (token: string) => {
   });
 };
 
+export const createUser = (data: any, token: string) => {
+  return apiClient.post('/admin/create-user', data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export default apiClient;
