@@ -103,5 +103,40 @@ export const getShopDashboardSummary = (token: string) => {
     });
 };
 
+// Shop Inventory API
+export const getPlatformFertilizers = () => {
+    return apiClient.get('/fertilizers');
+};
+
+export const getShopInventory = (token: string) => {
+    return apiClient.get('/shop_owner/inventory', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const getShopInventoryItem = (id: number, token: string) => {
+    return apiClient.get(`/shop_owner/inventory/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const addShopInventory = (data: any, token: string) => {
+    return apiClient.post('/shop_owner/inventory', data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const updateShopInventory = (id: number, data: any, token: string) => {
+    return apiClient.post(`/shop_owner/inventory/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const deleteShopInventory = (id: number, token: string) => {
+    return apiClient.delete(`/shop_owner/inventory/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
 
 export default apiClient;

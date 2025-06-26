@@ -1,103 +1,96 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { addShopInventory, updateShopInventory, getShopInventoryItem } from '@/app/services/api';
 
-import React, { useState } from 'react';
+export const AddProductModal = ({ availableFertilizers, inventoryId, onFormSubmit, onCancel }: { availableFertilizers: any[], inventoryId?: number, onFormSubmit: () => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState({
+        fertilizer_id: '',
+        stock_quantity: '',
+        price_per_unit: '',
+        stock_status: 'in_stock',
+    });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-interface AddProductModalProps {
-    onClose: () => void;
-}
+    useEffect(() => {
+        if (inventoryId) {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Authentication token not found.');
+                setLoading(false);
+                return;
+            }
+            getShopInventoryItem(inventoryId, token)
+                .then(response => {
+                    const { fertilizer_id, stock_quantity, price_per_unit, stock_status } = response.data;
+                    setFormData({ fertilizer_id, stock_quantity, price_per_unit, stock_status });
+                })
+                .catch(() => setError('Failed to fetch inventory item details.'))
+                .finally(() => setLoading(false));
+        }
+    }, [inventoryId]);
 
-export default function AddProductModal({ onClose }: AddProductModalProps) {
-    const [fertilizer, setFertilizer] = useState('');
-    const [quantity, setQuantity] = useState('');
-    const [price, setPrice] = useState('');
-    const [status, setStatus] = useState('In Stock');
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
 
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication token not found.');
+            setLoading(false);
+            return;
+        }
 
-        console.log({ fertilizer, quantity, price, status });
-
-
-        onClose();
+        try {
+            if (inventoryId) {
+                await updateShopInventory(inventoryId, formData, token);
+            } else {
+                await addShopInventory(formData, token);
+            }
+            onFormSubmit();
+        } catch (err) {
+            setError('Failed to save inventory item.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg relative">
-                {/* ❌ router.back removed — only onClose() used */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl"
-                >
-                    ×
-                </button>
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.8)] flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">{inventoryId ? 'Edit' : 'Add'} Product to Inventory</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <select name="fertilizer_id" value={formData.fertilizer_id} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" disabled={!!inventoryId}>
+                        <option value="">Select a fertilizer</option>
+                        {availableFertilizers.map(f => (
+                            <option key={f.id} value={f.id}>{f.name}</option>
+                        ))}
+                    </select>
+                    <input type="number" name="stock_quantity" value={formData.stock_quantity} onChange={handleChange} placeholder="Stock Quantity" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                    <input type="number" name="price_per_unit" value={formData.price_per_unit} onChange={handleChange} placeholder="Price Per Unit" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                    <select name="stock_status" value={formData.stock_status} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                    
+                    {error && <p className="text-red-600 text-center font-medium">{error}</p>}
 
-                <h2 className="text-2xl font-semibold text-gray-800 mb-1">Add New Product</h2>
-                <p className="text-sm text-gray-500 mb-6">
-                    Fill out the product details to update your inventory.
-                </p>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Fertilizer</label>
-                        <select
-                            value={fertilizer}
-                            onChange={(e) => setFertilizer(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                            required
-                        >
-                            <option value="">Select a fertilizer</option>
-                            <option value="Urea (46% Nitrogen)">Urea (46% Nitrogen)</option>
-                            <option value="DAP (18-46-0)">DAP (18-46-0)</option>
-                            <option value="MOP (0-0-60)">MOP (0-0-60)</option>
-                            <option value="Organic Vermicompost">Organic Vermicompost</option>
-                        </select>
+                    <div className="flex justify-end gap-4 pt-4">
+                        <button type="button" onClick={onCancel} className="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold transition" disabled={loading}>Cancel</button>
+                        <button type="submit" className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition" disabled={loading}>
+                            {loading ? 'Saving...' : 'Save'}
+                        </button>
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity (kg)</label>
-                        <input
-                            type="number"
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Price per Unit (৳/kg)</label>
-                        <input
-                            type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
-                        >
-                            <option value="In Stock">In Stock</option>
-                            <option value="Low Stock">Low Stock</option>
-                            <option value="Out of Stock">Out of Stock</option>
-                        </select>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition font-medium"
-                    >
-                        Add to Inventory
-                    </button>
                 </form>
             </div>
         </div>
     );
-}
+};

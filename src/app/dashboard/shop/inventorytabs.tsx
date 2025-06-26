@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import ShopProfile from "./profile/showprofile";
 import InventoryManagementPage from "@/app/dashboard/shop/inventorymanagemant/inventory-management";
 
-const InventoryTabs = ({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void }) => {
+const InventoryTabs = ({ hasProfileSetup, onProfileUpdate, onInventoryUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void, onInventoryUpdate: () => void }) => {
     const [activeTab, setActiveTab] = useState(hasProfileSetup ? "inventory" : "shop");
 
     useEffect(() => {
@@ -48,7 +48,7 @@ const InventoryTabs = ({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: 
             <div>
                 {activeTab === "inventory" && hasProfileSetup && (
                     <div className="mt-4">
-                        <InventoryManagementPage/>
+                        <InventoryManagementPage onInventoryUpdate={onInventoryUpdate} />
                     </div>
                 )}
 

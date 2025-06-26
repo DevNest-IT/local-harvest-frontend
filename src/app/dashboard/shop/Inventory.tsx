@@ -8,44 +8,7 @@ import { getShopDashboardSummary } from "@/app/services/api";
 import FarmerHeader from "@/app/dashboard/shop/header";
 import InventoryTabs from "@/app/dashboard/shop/inventorytabs";
 
-export default function InventoryPage({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void }) {
-    return (
-        <div className="min-h-screen flex flex-col bg-gray-100 text-gray-800">
-            <FarmerHeader />
-
-            <main className="px-6 py-6">
-                {hasProfileSetup && <InventorySummary />}
-                <InventoryTabs hasProfileSetup={hasProfileSetup} onProfileUpdate={onProfileUpdate} />
-            </main>
-        </div>
-    );
-}
-
-
-const InventorySummary = () => {
-    const [summary, setSummary] = useState<any>(null);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const fetchSummary = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setError('Authentication token not found.');
-                return;
-            }
-            try {
-                const response = await getShopDashboardSummary(token);
-                setSummary(response.data);
-            } catch (err) {
-                setError('Failed to fetch summary.');
-            }
-        };
-        fetchSummary();
-    }, []);
-
-    if (error) return <p className="text-red-500">{error}</p>;
-    if (!summary) return <p>Loading summary...</p>;
-
+const InventorySummary = ({ summary }: { summary: any }) => {
     const summaryData = [
         {
             title: "Total Products",
@@ -86,3 +49,43 @@ const InventorySummary = () => {
         </div>
     );
 };
+
+export default function InventoryPage({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void }) {
+    const [summary, setSummary] = useState<any>(null);
+    const [error, setError] = useState('');
+
+    const fetchSummary = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication token not found.');
+            return;
+        }
+        try {
+            const response = await getShopDashboardSummary(token);
+            setSummary(response.data);
+        } catch (err) {
+            setError('Failed to fetch summary.');
+        }
+    };
+
+    useEffect(() => {
+        if (hasProfileSetup) {
+            fetchSummary();
+        }
+    }, [hasProfileSetup]);
+
+    const handleInventoryUpdate = () => {
+        fetchSummary();
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+            <FarmerHeader />
+
+            <main className="px-6 py-6">
+                {hasProfileSetup && summary && <InventorySummary summary={summary} />}
+                <InventoryTabs hasProfileSetup={hasProfileSetup} onProfileUpdate={onProfileUpdate} onInventoryUpdate={handleInventoryUpdate} />
+            </main>
+        </div>
+    );
+}
