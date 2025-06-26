@@ -1,24 +1,35 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ShopProfile from "./profile/showprofile";
 import InventoryManagementPage from "@/app/dashboard/shop/inventorymanagemant/inventory-management";
- // Adjust the path if needed
 
-const InventoryTabs = () => {
-    const [activeTab, setActiveTab] = useState("inventory");
+const InventoryTabs = ({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void }) => {
+    const [activeTab, setActiveTab] = useState(hasProfileSetup ? "inventory" : "shop");
+
+    useEffect(() => {
+        if (!hasProfileSetup) {
+            setActiveTab("shop");
+        }
+    }, [hasProfileSetup]);
 
     return (
         <div className="p-6">
-            {/* Tabs */}
+            {!hasProfileSetup && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+                    <p className="font-bold">Welcome!</p>
+                    <p>Please set up your shop profile to get started.</p>
+                </div>
+            )}
             <div className="flex space-x-2 bg-gray-100 p-1 rounded-md mb-6 w-fit">
                 <button
                     className={`cursor-pointer px-4 py-2 rounded-md text-sm font-medium ${
                         activeTab === "inventory"
                             ? "bg-white text-black shadow"
                             : "text-gray-500"
-                    }`}
-                    onClick={() => setActiveTab("inventory")}
+                    } ${!hasProfileSetup && 'cursor-not-allowed opacity-50'}`}
+                    onClick={() => hasProfileSetup && setActiveTab("inventory")}
+                    disabled={!hasProfileSetup}
                 >
                     Inventory Management
                 </button>
@@ -35,7 +46,7 @@ const InventoryTabs = () => {
             </div>
 
             <div>
-                {activeTab === "inventory" && (
+                {activeTab === "inventory" && hasProfileSetup && (
                     <div className="mt-4">
                         <InventoryManagementPage/>
                     </div>
@@ -43,7 +54,7 @@ const InventoryTabs = () => {
 
                 {activeTab === "shop" && (
                     <div className="mt-4">
-                        <ShopProfile />
+                        <ShopProfile onProfileUpdate={onProfileUpdate} />
                     </div>
                 )}
             </div>

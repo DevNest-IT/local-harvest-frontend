@@ -28,12 +28,7 @@ export default function LoginBox() {
                 if (user.role === 'admin') {
                     router.push('/dashboard/admin');
                 } else if (user.role === 'shop_owner') {
-                    if (user.hasProfileSetup) {
-                        router.push('/dashboard/shop');
-                    } else {
-
-                        router.push('/dashboard/shop/profile');
-                    }
+                    router.push('/dashboard/shop');
                 }
             } else {
                 alert('Login failed: Invalid response from server.');

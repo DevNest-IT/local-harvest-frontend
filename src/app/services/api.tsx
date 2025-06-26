@@ -72,5 +72,30 @@ export const deleteFertilizer = (id: number, token: string) => {
     });
 };
 
+// Shop Owner API
+export const getShopProfile = (token: string) => {
+    return apiClient.get('/shop_owner/shop-profile', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const setupShopProfile = (data: FormData, token: string) => {
+    return apiClient.post('/shop_owner/setup-shop-profile', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
+export const editShopProfile = (data: FormData, token: string) => {
+    return apiClient.post('/shop_owner/edit-shop-profile', data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
 
 export default apiClient;

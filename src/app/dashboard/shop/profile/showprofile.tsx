@@ -1,230 +1,211 @@
 'use client';
+import { useState, useEffect, useRef } from 'react';
+import { getShopProfile, setupShopProfile, editShopProfile } from '@/app/services/api';
+import { Camera, Edit, Save } from 'lucide-react';
 
-import { useState, useRef } from 'react';
-import { Pencil, Save, Upload } from 'lucide-react';
-import { useEffect } from 'react';
+interface ShopProfileProps {
+    onProfileUpdate: () => void;
+}
 
+const ProfileSkeleton = () => (
+    <div className="w-full mt-6 p-8 bg-white rounded-2xl shadow-md border border-gray-200 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
+        <div className="flex flex-col md:flex-row gap-8">
+            <div className="w-36 h-36 rounded-full bg-gray-200"></div>
+            <div className="flex-1 space-y-6">
+                <div className="h-6 bg-gray-200 rounded w-full"></div>
+                <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-6 bg-gray-200 rounded w-full"></div>
+            </div>
+        </div>
+    </div>
+);
 
-export default function ShopProfile() {
+export default function ShopProfile({ onProfileUpdate }: ShopProfileProps) {
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        shop_name: '',
+        contact_number: '',
+        address: '',
+    });
+    const [owner_picture, setOwnerPicture] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [profile, setProfile] = useState({
-        ownerName: '',
-        shop_Name: '',
-        contactNumber: '',
-        memberSince: '',
-        shopAddress: '',
-    });
-    const [showWelcome, setShowWelcome] = useState(false);
-    const [userName, setUserName] = useState('');
-
-    useEffect(() => {
-        const welcomeFlag = localStorage.getItem('showWelcome');
-        const name = localStorage.getItem('userName');
-
-        if (welcomeFlag === 'true' && name) {
-            setShowWelcome(true);
-            setUserName(name);
-            localStorage.removeItem('showWelcome'); // only show once
+    const fetchProfile = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication required.');
+            setLoading(false);
+            return;
         }
-    }, []);
+        try {
+            const response = await getShopProfile(token);
+            setProfile(response.data);
+            setFormData({
+                shop_name: response.data.shop_name,
+                contact_number: response.data.contact_number,
+                address: response.data.address,
+            });
+        } catch (err: any) {
+            if (err.response && err.response.status === 404) {
+                setIsEditing(true); // Force edit mode if profile not set
+            } else {
+                setError('Failed to fetch profile.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await fetch('https://medback.site/api/shop_owner/shop-profile', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // Add 'Authorization' header if needed
-                    },
-                });
-
-                if (!res.ok) throw new Error('Failed to fetch profile');
-
-                const data = await res.json();
-
-                setProfile({
-                    ownerName: data.ownerName,
-                    shop_Name: data.shop_Name,
-                    contactNumber: data.contactNumber,
-                    memberSince: data.memberSince,
-                    shopAddress: data.shopAddress,
-                });
-
-                if (data.profileImage) setProfileImage(data.profileImage);
-            } catch (error) {
-                console.error('Error loading profile:', error);
-                alert('Could not load profile');
-            }
-        };
-
         fetchProfile();
     }, []);
 
-
-    const [profileImage, setProfileImage] = useState<string | null>(null);
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setProfile(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileImage(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setOwnerPicture(e.target.files[0]);
         }
     };
 
-    const triggerFileSelect = () => {
-        fileInputRef.current?.click();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication required.');
+            setLoading(false);
+            return;
+        }
+
+        const data = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            data.append(key, value);
+        });
+        if (owner_picture) {
+            data.append('owner_picture', owner_picture);
+        }
+
+        try {
+            if (profile) {
+                await editShopProfile(data, token);
+            } else {
+                await setupShopProfile(data, token);
+            }
+            setIsEditing(false);
+            fetchProfile(); // Refetch to show updated data
+            onProfileUpdate();
+        } catch (err) {
+            setError('Failed to save profile.');
+        } finally {
+            setLoading(false);
+        }
     };
 
+    if (loading) return <ProfileSkeleton />;
+    if (error && !isEditing) return <p className="text-red-500">{error}</p>;
 
     return (
-
         <div className="w-full mt-6 p-8 bg-white rounded-2xl shadow-md border border-gray-200">
-            {/* Header */}
-            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md shadow text-2xl text-center mb-4">
-                👋 আপনাকে স্বাগতম ,!
-            </div>
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Shop Profile</h2>
-                    <p className="text-gray-500 text-sm">View and manage your shop details</p>
-                </div>
-                <div className="p-6">
-
-                </div>
-                <button
-                    onClick={() => setIsEditing(prev => !prev)}
-                    className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition"
-                >
-                    {isEditing ? (
-                        <>
-                            <Save size={16} /> Save
-                        </>
-                    ) : (
-                        <>
-                            <Pencil size={16} /> Edit Profile
-                        </>
-                    )}
-                </button>
+            <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-800">
+                    {profile ? 'Shop Profile' : 'Setup Your Shop Profile'}
+                </h2>
+                {profile && (
+                    <button
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
+                        {isEditing ? <Save size={16} /> : <Edit size={16} />}
+                        <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
+                    </button>
+                )}
             </div>
 
-            {/* Profile Section */}
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* Profile Image Upload */}
-                <div
-                    className="relative w-36 h-36 rounded-full overflow-hidden bg-gray-100 border cursor-pointer group"
-                    onClick={triggerFileSelect}
-                    title="Click to upload photo"
-                >
-                    {profileImage ? (
+            <form onSubmit={handleSubmit}>
+                <div className="flex flex-col md:flex-row gap-8">
+                    <div className="relative w-36 h-36">
                         <img
-                            src={profileImage}
+                            src={owner_picture ? URL.createObjectURL(owner_picture) : profile?.owner_picture_url || '/farmer.png'}
                             alt="Profile"
-                            className="object-cover w-full h-full"
+                            className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
                         />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400">
-                            📷
-                        </div>
-                    )}
-                    {isEditing && (
-                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                            <Upload size={24} className="text-white" />
-                        </div>
-
-                    )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        disabled={!isEditing}
-                    />
-                </div>
-
-                {/* Form Section */}
-                <div className="flex-1 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Owner Name</label>
-                            <input
-                                type="text"
-                                name="ownerName"
-                                value={profile.ownerName}
-                                onChange={handleChange}
-                                readOnly
-                                className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 bg-gray-100"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Shop Name</label>
-                            <input
-                                type="text"
-                                name="shopName"
-                                value={profile.shop_Name}
-                                onChange={handleChange}
-                                readOnly={!isEditing}
-                                className={`w-full mt-1 px-4 py-2 rounded-lg border ${
-                                    isEditing ? 'border-gray-300' : 'border-gray-200 bg-gray-100'
-                                } focus:outline-none focus:ring-2 focus:ring-green-500`}
-                            />
-                        </div>
+                        {isEditing && (
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700"
+                            >
+                                <Camera size={16} />
+                            </button>
+                        )}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            className="hidden"
+                            disabled={!isEditing}
+                        />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Contact Number</label>
-                            <input
-                                type="text"
-                                name="contactNumber"
-                                value={profile.contactNumber}
-                                onChange={handleChange}
-                                readOnly={!isEditing}
-                                className={`w-full mt-1 px-4 py-2 rounded-lg border ${
-                                    isEditing ? 'border-gray-300' : 'border-gray-200 bg-gray-100'
-                                } focus:outline-none focus:ring-2 focus:ring-green-500`}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Shop Serial Number</label>
-                            <input
-                                type="text"
-                                name="memberSince"
-                                value={profile.memberSince}
-                                readOnly
-                                className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 bg-gray-100"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Shop Address</label>
-                        <textarea
-                            name="shopAddress"
-                            value={profile.shopAddress}
+                    <div className="flex-1 space-y-4">
+                        <input
+                            type="text"
+                            name="shop_name"
+                            value={formData.shop_name}
                             onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={`w-full mt-1 px-4 py-2 rounded-lg border ${
-                                isEditing ? 'border-gray-300' : 'border-gray-200 bg-gray-100'
-                            } focus:outline-none focus:ring-2 focus:ring-green-500`}
-                            rows={3}
+                            placeholder="Shop Name"
+                            className="w-full p-3 border rounded-lg"
+                            readOnly={!!profile}
                         />
+                        <input
+                            type="text"
+                            name="contact_number"
+                            value={formData.contact_number}
+                            onChange={handleChange}
+                            placeholder="Contact Number"
+                            className="w-full p-3 border rounded-lg"
+                            readOnly={!isEditing}
+                        />
+                        <textarea
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder="Shop Address"
+                            className="w-full p-3 border rounded-lg"
+                            rows={3}
+                            readOnly={!isEditing}
+                        />
+                        {profile && (
+                            <p className="text-sm text-gray-500">
+                                Shop Serial: {profile.shop_serial_number} | Status: {profile.status}
+                            </p>
+                        )}
                     </div>
                 </div>
-            </div>
+
+                {isEditing && (
+                    <div className="flex justify-end mt-8">
+                        <button
+                            type="submit"
+                            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                            disabled={loading}
+                        >
+                            <Save size={16} />
+                            <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+                        </button>
+                    </div>
+                )}
+            </form>
         </div>
     );
 }

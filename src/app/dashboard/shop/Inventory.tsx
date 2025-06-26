@@ -8,17 +8,14 @@ import ShopProfile from "@/app/dashboard/shop/profile/showprofile";
 import FarmerHeader from "@/app/dashboard/shop/header";
 import InventoryTabs from "@/app/dashboard/shop/inventorytabs";
 
-export default function InventoryPage() {
+export default function InventoryPage({ hasProfileSetup, onProfileUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void }) {
     return (
         <div className="min-h-screen flex flex-col bg-gray-100 text-gray-800">
             <FarmerHeader />
 
             <main className="px-6 py-6">
-
-                <InventorySummary />
-                <InventoryTabs/>
-
-                {/* Add more sections like Fertilizer Inventory Table */}
+                {hasProfileSetup && <InventorySummary />}
+                <InventoryTabs hasProfileSetup={hasProfileSetup} onProfileUpdate={onProfileUpdate} />
             </main>
         </div>
     );
