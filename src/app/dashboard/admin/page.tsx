@@ -8,6 +8,7 @@ import { CreateUserForm } from './components/CreateUserForm';
 import { PlaceholderContent } from './components/PlaceholderContent';
 import { DashboardOverview } from './components/DashboardOverview';
 import { FertilizerControl } from './components/FertilizerControl';
+import ProfileToggle from "@/app/dashboard/admin/components/Shopcontrol";
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -50,6 +51,8 @@ export default function AdminDashboard() {
                 return <CreateUserForm />;
             case 'fertilizer-control':
                 return <FertilizerControl />;
+            case 'profile-toogle':
+                return <ProfileToggle />;
             default:
                 return <DashboardOverview />;
         }

@@ -37,11 +37,12 @@ export const AdminSidebar = ({ activeView, setActiveView, handleLogout }: AdminS
                     <span>Fertilizer Control</span>
                 </button>
                 <button
-                    onClick={() => setActiveView('fertilizer-control')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition ${activeView === 'fertilizer-control' ? 'bg-slate-700' : 'hover:bg-slate-700'}`}
+                    onClick={() => setActiveView('profile-toogle')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition ${activeView === 'profile-toogle' ? 'bg-slate-700' : 'hover:bg-slate-700'}`}
                 >
                     <SlidersHorizontal size={20} />
-                    <Link href="/dashboard/admin/components/Shopcontrol">Shop Control</Link>
+                    <span>Shop Control</span>
+
                 </button>
             </nav>
             <div className="p-4 border-t border-slate-700">
