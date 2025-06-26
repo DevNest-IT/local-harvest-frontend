@@ -25,6 +25,7 @@ export default function ProfileToggle() {
 
     const handleToggle = () => {
         setShowModal(true);
+
     };
 
     const handleCheckboxChange = (item: string) => {
