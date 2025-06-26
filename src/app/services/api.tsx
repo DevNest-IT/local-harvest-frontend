@@ -97,5 +97,11 @@ export const editShopProfile = (data: FormData, token: string) => {
     });
 };
 
+export const getShopDashboardSummary = (token: string) => {
+    return apiClient.get('/shop_owner/shop-dashboard-summary', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
 
 export default apiClient;
