@@ -1,15 +1,20 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Typewriter } from 'react-simple-typewriter';
 import LoginBox from "@/app/dashboard/login/loginbox";
 import SearchFilter from "@/app/component/serch_filter";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { getPlatformFertilizers } from '@/app/services/api';
+import { CardShimmer } from '@/app/component/Shimmer';
+import { FertilizerDetailsModal } from '@/app/component/FertilizerDetailsModal';
 
 export default function Dashboard() {
     const [showLogin, setShowLogin] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [fertilizers, setFertilizers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedFertilizerId, setSelectedFertilizerId] = useState<number | null>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -17,6 +22,19 @@ export default function Dashboard() {
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
+
+        const fetchFertilizers = async () => {
+            try {
+                const response = await getPlatformFertilizers();
+                setFertilizers(response.data);
+            } catch (error) {
+                console.error('Failed to fetch fertilizers', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFertilizers();
     }, []);
 
     const handleAccessDashboard = () => {
@@ -74,7 +92,28 @@ export default function Dashboard() {
                         onSearch={(q) => console.log(q)}
                         onFilter={(v) => console.log(v)}
                     />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
+                        {loading ? (
+                            Array.from({ length: 6 }).map((_, index) => <CardShimmer key={index} />)
+                        ) : (
+                            fertilizers.map(fertilizer => (
+                                <div key={fertilizer.id} className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" onClick={() => setSelectedFertilizerId(fertilizer.id)}>
+                                    <img src={fertilizer.image_url} alt={fertilizer.name} className="w-full h-48 object-cover" />
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-bold">{fertilizer.name}</h3>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </main>
+            )}
+
+            {selectedFertilizerId && (
+                <FertilizerDetailsModal
+                    fertilizerId={selectedFertilizerId}
+                    onCancel={() => setSelectedFertilizerId(null)}
+                />
             )}
 
             {/* Show login box when toggled */}

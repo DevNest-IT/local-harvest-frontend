@@ -108,6 +108,10 @@ export const getPlatformFertilizers = () => {
     return apiClient.get('/fertilizers');
 };
 
+export const getFertilizerWithShops = (id: number) => {
+    return apiClient.get(`/fertilizers/${id}`);
+};
+
 export const getShopInventory = (token: string) => {
     return apiClient.get('/shop_owner/inventory', {
         headers: { Authorization: `Bearer ${token}` },
