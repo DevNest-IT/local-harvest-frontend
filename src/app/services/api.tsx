@@ -138,5 +138,34 @@ export const deleteShopInventory = (id: number, token: string) => {
     });
 };
 
+// Sales API
+export const createSale = (data: any, token: string) => {
+    return apiClient.post('/shop_owner/sales', data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const searchSale = (receiptNo: string, token: string) => {
+    return apiClient.get(`/shop_owner/sales/search?receipt_no=${receiptNo}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const getSales = (token: string, page: number = 1) => {
+    return apiClient.get(`/shop_owner/sales?page=${page}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const downloadReceipt = (saleId: number, token: string) => {
+    return apiClient.get(`/shop_owner/sales/${saleId}/download-receipt`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+        },
+        responseType: 'blob',
+    });
+};
+
 
 export default apiClient;

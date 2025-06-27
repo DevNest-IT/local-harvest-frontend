@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import ShopProfile from "./profile/showprofile";
 import InventoryManagementPage from "@/app/dashboard/shop/inventorymanagemant/inventory-management";
+import { Sales } from "./components/Sales";
 
 const InventoryTabs = ({ hasProfileSetup, onProfileUpdate, onInventoryUpdate }: { hasProfileSetup: boolean, onProfileUpdate: () => void, onInventoryUpdate: () => void }) => {
     const [activeTab, setActiveTab] = useState(hasProfileSetup ? "inventory" : "shop");
@@ -43,6 +44,17 @@ const InventoryTabs = ({ hasProfileSetup, onProfileUpdate, onInventoryUpdate }: 
                 >
                     Shop Profile
                 </button>
+                <button
+                    className={`cursor-pointer px-4 py-2 rounded-md text-sm font-medium ${
+                        activeTab === "sales"
+                            ? "bg-white text-black shadow"
+                            : "text-gray-500"
+                    } ${!hasProfileSetup && 'cursor-not-allowed opacity-50'}`}
+                    onClick={() => hasProfileSetup && setActiveTab("sales")}
+                    disabled={!hasProfileSetup}
+                >
+                    Sales
+                </button>
             </div>
 
             <div>
@@ -55,6 +67,11 @@ const InventoryTabs = ({ hasProfileSetup, onProfileUpdate, onInventoryUpdate }: 
                 {activeTab === "shop" && (
                     <div className="mt-4">
                         <ShopProfile onProfileUpdate={onProfileUpdate} />
+                    </div>
+                )}
+                {activeTab === "sales" && hasProfileSetup && (
+                    <div className="mt-4">
+                        <Sales />
                     </div>
                 )}
             </div>
