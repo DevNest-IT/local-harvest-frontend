@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { addFertilizer, updateFertilizer, getFertilizerDetails } from '@/app/services/api';
+import { uploadImage } from '@/app/services/mediaApi';
 
 export const AddEditFertilizerForm = ({ fertilizerId, onFormSubmit, onCancel }: { fertilizerId?: number, onFormSubmit: () => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState({
@@ -56,19 +57,31 @@ export const AddEditFertilizerForm = ({ fertilizerId, onFormSubmit, onCancel }: 
             return;
         }
 
-        const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            data.append(key, value);
-        });
+        let imageUrl = '';
         if (image) {
-            data.append('image', image);
+            try {
+                const uploadResponse = await uploadImage(image);
+                imageUrl = uploadResponse.data.url;
+            } catch (err) {
+                setError('Failed to upload image.');
+                setLoading(false);
+                return;
+            }
+        }
+
+        const fertilizerData = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            fertilizerData.append(key, value);
+        });
+        if (imageUrl) {
+            fertilizerData.append('image_url', imageUrl);
         }
 
         try {
             if (fertilizerId) {
-                await updateFertilizer(fertilizerId, data, token);
+                await updateFertilizer(fertilizerId, fertilizerData, token);
             } else {
-                await addFertilizer(data, token);
+                await addFertilizer(fertilizerData, token);
             }
             onFormSubmit();
         } catch (err) {

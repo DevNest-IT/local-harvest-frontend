@@ -157,15 +157,5 @@ export const getSales = (token: string, page: number = 1) => {
     });
 };
 
-export const downloadReceipt = (saleId: number, token: string) => {
-    return apiClient.get(`/shop_owner/sales/${saleId}/download-receipt`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-        },
-        responseType: 'blob',
-    });
-};
-
 
 export default apiClient;
