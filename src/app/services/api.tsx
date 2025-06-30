@@ -161,5 +161,18 @@ export const getSales = (token: string, page: number = 1) => {
     });
 };
 
+// Admin Shop Control API
+export const getShops = (token: string) => {
+    return apiClient.get('/admin/shops', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
+export const toggleShopStatus = (id: number, status: string, token: string) => {
+    return apiClient.patch(`/admin/shops/${id}/toggle-status`, { status }, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
 
 export default apiClient;

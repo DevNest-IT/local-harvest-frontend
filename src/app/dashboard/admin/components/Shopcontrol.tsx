@@ -1,145 +1,142 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { getShops, toggleShopStatus } from '@/app/services/api';
+import { Search } from 'lucide-react';
+import { ToggleStatusModal } from './ToggleStatusModal';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { Dialog } from '@headlessui/react';
-import { CheckCircle, XCircle } from 'lucide-react';
+export const ShopControl = () => {
+    const [shops, setShops] = useState<any[]>([]);
+    const [filteredShops, setFilteredShops] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [shopToToggle, setShopToToggle] = useState<any>(null);
 
-const suggestions = [
-    'Receive notifications',
-    'Allow profile visibility',
-    'Enable location',
-    'Accept terms and conditions'
-];
-
-const profile = {
-    name: 'Kamal Uddin',
-    phone: '+880 1234-567890',
-    image: '/profile.png'
-};
-
-export default function ProfileToggle() {
-    const [isActive, setIsActive] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [checkedItems, setCheckedItems] = useState<string[]>([]);
-
-    const handleToggle = () => {
-        setShowModal(true);
+    const fetchShops = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication token not found.');
+            setLoading(false);
+            return;
+        }
+        try {
+            setLoading(true);
+            const response = await getShops(token);
+            setShops(response.data);
+            setFilteredShops(response.data);
+        } catch (err) {
+            setError('Failed to fetch shops.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleCheckboxChange = (item: string) => {
-        setCheckedItems(prev =>
-            prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-        );
+    useEffect(() => {
+        fetchShops();
+    }, []);
+
+    useEffect(() => {
+        let results = shops;
+        if (statusFilter !== 'all') {
+            results = results.filter(shop => shop.status === statusFilter);
+        }
+        if (searchTerm) {
+            results = results.filter(shop =>
+                shop.shop_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                shop.contact_number.includes(searchTerm)
+            );
+        }
+        setFilteredShops(results);
+    }, [searchTerm, shops, statusFilter]);
+
+    const handleStatusToggle = (shop: any) => {
+        setShopToToggle(shop);
+        setShowConfirmModal(true);
     };
 
-    const confirmToggle = () => {
-        if (checkedItems.length === 0) return;
-        setIsActive(!isActive);
-        setShowModal(false);
-        setCheckedItems([]);
+    const confirmStatusToggle = async (id: number, currentStatus: string) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Authentication token not found.');
+            return;
+        }
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+        try {
+            await toggleShopStatus(id, newStatus, token);
+            fetchShops(); // Refetch to get the updated list
+        } catch (err) {
+            setError('Failed to toggle shop status.');
+        } finally {
+            setShowConfirmModal(false);
+            setShopToToggle(null);
+        }
     };
 
     return (
-        <div className="w-full px-6 py-4 border rounded-xl shadow-md bg-white">
-            <div className="flex items-center justify-between w-full gap-4">
-                {/* 1. Profile Image */}
-                <div className="flex-shrink-0">
-                    <Image
-                        src={profile.image}
-                        alt="Profile"
-                        width={60}
-                        height={60}
-                        className="rounded-full"
-                    />
-                </div>
-
-                {/* 2. Name + Phone vertically */}
-                <div className="flex flex-col text-sm text-left">
-                    <span className="font-medium text-gray-800">{profile.name}</span>
-                    <span className="text-gray-600">{profile.phone}</span>
-                </div>
-
-                {/* 3. Status */}
-                <div className={`font-semibold text-sm ${isActive ? 'text-green-600' : 'text-red-600'}`}>
-                    {isActive ? 'Active' : 'Deactive'}
-                </div>
-
-                {/* 4. Toggle Button aligned right */}
-                <div className="ml-auto">
-                    <button
-                        onClick={handleToggle}
-                        className={`w-14 h-7 flex items-center rounded-full p-1 transition duration-300 ease-in-out ${
-                            isActive ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                    >
-                        <div
-                            className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ${
-                                isActive ? 'translate-x-7' : ''
-                            }`}
-                        ></div>
-                    </button>
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Shop Control</h2>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        {['all', 'active', 'inactive'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setStatusFilter(status)}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition ${statusFilter === status ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                            >
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by name or phone..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 p-2 border rounded-lg"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Modal */}
-            <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
-                <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                <div className="fixed inset-0 flex items-center justify-center">
-                    <Dialog.Panel className="bg-white p-6 rounded shadow-md w-80">
-                        <Dialog.Title className="text-lg font-bold mb-2 flex items-center gap-2">
-                            {isActive ? (
-                                <>
-                                    <CheckCircle className="text-green-600 w-5 h-5" />
-                                    <span>Currently Active. Deactivate?</span>
-                                </>
-                            ) : (
-                                <>
-                                    <XCircle className="text-red-600 w-5 h-5" />
-                                    <span>Currently Deactive. Activate?</span>
-                                </>
-                            )}
-                        </Dialog.Title>
+            {loading && <p>Loading shops...</p>}
+            {error && <p className="text-red-500">{error}</p>}
 
-                        <p className="text-sm text-gray-600 mb-4">
-                            Please select at least one option to continue.
-                        </p>
-
-                        <div className="space-y-2 mb-4 text-left">
-                            {suggestions.map((item, index) => (
-                                <div key={index} className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id={`checkbox-${index}`}
-                                        checked={checkedItems.includes(item)}
-                                        onChange={() => handleCheckboxChange(item)}
-                                        className="mr-2"
-                                    />
-                                    <label htmlFor={`checkbox-${index}`}>{item}</label>
-                                </div>
-                            ))}
+            <div className="space-y-4">
+                {filteredShops.map(shop => (
+                    <div key={shop.id} className="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <img src={shop.owner_picture_url} alt={shop.shop_name} className="w-12 h-12 rounded-full object-cover" />
+                            <div>
+                                <h3 className="font-bold">{shop.shop_name}</h3>
+                                <p className="text-sm text-gray-600">{shop.user.name} - {shop.contact_number}</p>
+                            </div>
                         </div>
-
-                        <div className="flex justify-end gap-2">
+                        <div className="flex items-center gap-4">
                             <button
-                                onClick={() => setShowModal(false)}
-                                className="text-gray-600 hover:text-black"
+                                onClick={() => handleStatusToggle(shop)}
+                                className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${shop.status === 'active' ? 'bg-green-500' : 'bg-gray-300'}`}
                             >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmToggle}
-                                className={`px-4 py-1 rounded ${
-                                    checkedItems.length > 0 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                                }`}
-                                disabled={checkedItems.length === 0}
-                            >
-                                Confirm
+                                <span
+                                    className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${shop.status === 'active' ? 'translate-x-6' : 'translate-x-1'}`}
+                                />
                             </button>
                         </div>
-                    </Dialog.Panel>
-                </div>
-            </Dialog>
+                    </div>
+                ))}
+            </div>
+            {showConfirmModal && shopToToggle && (
+                <ToggleStatusModal
+                    shopName={shopToToggle.shop_name}
+                    currentStatus={shopToToggle.status}
+                    onConfirm={() => confirmStatusToggle(shopToToggle.id, shopToToggle.status)}
+                    onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
         </div>
     );
-}
+};

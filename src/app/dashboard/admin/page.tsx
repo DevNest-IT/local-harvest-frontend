@@ -8,7 +8,7 @@ import { CreateUserForm } from './components/CreateUserForm';
 import { PlaceholderContent } from './components/PlaceholderContent';
 import { DashboardOverview } from './components/DashboardOverview';
 import { FertilizerControl } from './components/FertilizerControl';
-import ProfileToggle from "@/app/dashboard/admin/components/Shopcontrol";
+import { ShopControl } from './components/ShopControl';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -51,8 +51,8 @@ export default function AdminDashboard() {
                 return <CreateUserForm />;
             case 'fertilizer-control':
                 return <FertilizerControl />;
-            case 'profile-toogle':
-                return <ProfileToggle />;
+            case 'shop-control':
+                return <ShopControl />;
             default:
                 return <DashboardOverview />;
         }
@@ -65,9 +65,9 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen flex bg-gray-50">
             <AdminSidebar activeView={activeView} setActiveView={setActiveView} handleLogout={handleLogout} />
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col" style={{ height: '100vh' }}>
                 <AdminHeader user={user} />
-                <main className="flex-1 p-8 flex items-center justify-center">
+                <main className="flex-1 p-8 overflow-y-auto">
                     {renderContent()}
                 </main>
             </div>
