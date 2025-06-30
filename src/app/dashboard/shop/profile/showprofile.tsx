@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { getShopProfile, setupShopProfile, editShopProfile } from '@/app/services/api';
+import { uploadImage } from '@/app/services/mediaApi';
 import { Camera, Edit, Save } from 'lucide-react';
 
 interface ShopProfileProps {
@@ -77,6 +78,12 @@ export default function ShopProfile({ onProfileUpdate }: ShopProfileProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!formData.shop_name || !formData.contact_number || !formData.address || (!owner_picture && !profile)) {
+            setError('All fields, including a profile picture, are required.');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
@@ -87,19 +94,31 @@ export default function ShopProfile({ onProfileUpdate }: ShopProfileProps) {
             return;
         }
 
-        const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            data.append(key, value);
-        });
+        let imageUrl = profile?.owner_picture_url || '';
         if (owner_picture) {
-            data.append('owner_picture', owner_picture);
+            try {
+                const uploadResponse = await uploadImage(owner_picture);
+                imageUrl = uploadResponse.data.url;
+            } catch (err) {
+                setError('Failed to upload image.');
+                setLoading(false);
+                return;
+            }
+        }
+
+        const profileData = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            profileData.append(key, value);
+        });
+        if (imageUrl) {
+            profileData.append('owner_picture_url', imageUrl);
         }
 
         try {
             if (profile) {
-                await editShopProfile(data, token);
+                await editShopProfile(profileData, token);
             } else {
-                await setupShopProfile(data, token);
+                await setupShopProfile(profileData, token);
             }
             setIsEditing(false);
             fetchProfile(); // Refetch to show updated data
@@ -134,11 +153,20 @@ export default function ShopProfile({ onProfileUpdate }: ShopProfileProps) {
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col md:flex-row gap-8">
                     <div className="relative w-36 h-36">
-                        <img
-                            src={owner_picture ? URL.createObjectURL(owner_picture) : profile?.owner_picture_url || '/farmer.png'}
-                            alt="Profile"
-                            className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
-                        />
+                        {owner_picture || profile?.owner_picture_url ? (
+                            <img
+                                src={owner_picture ? URL.createObjectURL(owner_picture) : profile.owner_picture_url}
+                                alt="Profile"
+                                className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
+                            />
+                        ) : (
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-36 h-36 rounded-full bg-gray-100 border-2 border-dashed flex items-center justify-center cursor-pointer"
+                            >
+                                <Camera size={48} className="text-gray-400" />
+                            </div>
+                        )}
                         {isEditing && (
                             <button
                                 type="button"
@@ -205,6 +233,7 @@ export default function ShopProfile({ onProfileUpdate }: ShopProfileProps) {
                         </button>
                     </div>
                 )}
+                {error && <p className="text-red-500 mt-4">{error}</p>}
             </form>
         </div>
     );
