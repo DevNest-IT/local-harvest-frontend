@@ -9,6 +9,7 @@ import { PlaceholderContent } from './components/PlaceholderContent';
 import { DashboardOverview } from './components/DashboardOverview';
 import { FertilizerControl } from './components/FertilizerControl';
 import { ShopControl } from './components/ShopControl';
+import { Reports } from './components/Reports';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -53,6 +54,8 @@ export default function AdminDashboard() {
                 return <FertilizerControl />;
             case 'shop-control':
                 return <ShopControl />;
+            case 'reports':
+                return <Reports />;
             default:
                 return <DashboardOverview />;
         }

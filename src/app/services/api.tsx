@@ -174,5 +174,12 @@ export const toggleShopStatus = (id: number, status: string, token: string) => {
     });
 };
 
+// Reports API
+export const getFertilizerStockSummary = (token: string) => {
+    return apiClient.get('/admin/report-fertilizer-stock-summary', {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
 
 export default apiClient;

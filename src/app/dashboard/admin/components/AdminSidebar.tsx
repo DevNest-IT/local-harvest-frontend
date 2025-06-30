@@ -1,5 +1,5 @@
 'use client';
-import { UserPlus, SlidersHorizontal, LogOut, LayoutDashboard, Store } from 'lucide-react';
+import { UserPlus, SlidersHorizontal, LogOut, LayoutDashboard, Store, FileText } from 'lucide-react';
 import Link from "next/link";
 
 interface AdminSidebarProps {
@@ -42,6 +42,13 @@ export const AdminSidebar = ({ activeView, setActiveView, handleLogout }: AdminS
                 >
                     <Store size={20} />
                     <span>Shop Control</span>
+                </button>
+                <button
+                    onClick={() => setActiveView('reports')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition ${activeView === 'reports' ? 'bg-slate-700' : 'hover:bg-slate-700'}`}
+                >
+                    <FileText size={20} />
+                    <span>Reports</span>
                 </button>
             </nav>
             <div className="p-4 border-t border-slate-700">

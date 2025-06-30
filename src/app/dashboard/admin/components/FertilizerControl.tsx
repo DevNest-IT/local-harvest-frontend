@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { getFertilizers, deleteFertilizer } from '@/app/services/api';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { AddEditFertilizerForm } from './AddEditFertilizerForm';
+import { ConfirmationModal } from '@/app/dashboard/shop/components/ConfirmationModal';
 
 
 export const FertilizerControl = () => {
@@ -11,6 +12,8 @@ export const FertilizerControl = () => {
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [selectedFertilizerId, setSelectedFertilizerId] = useState<number | undefined>(undefined);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
     const fetchFertilizers = async () => {
         const token = localStorage.getItem('token');
@@ -34,8 +37,13 @@ export const FertilizerControl = () => {
         fetchFertilizers();
     }, []);
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this fertilizer?')) return;
+    const handleDelete = (id: number) => {
+        setItemToDelete(id);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        if (itemToDelete === null) return;
 
         const token = localStorage.getItem('token');
         if (!token) {
@@ -43,10 +51,13 @@ export const FertilizerControl = () => {
             return;
         }
         try {
-            await deleteFertilizer(id, token);
+            await deleteFertilizer(itemToDelete, token);
             fetchFertilizers(); // Refetch after delete
         } catch (err) {
             setError('Failed to delete fertilizer.');
+        } finally {
+            setShowDeleteConfirm(false);
+            setItemToDelete(null);
         }
     };
     
@@ -105,6 +116,14 @@ export const FertilizerControl = () => {
                         onCancel={() => setShowForm(false)}
                     />
                 </div>
+            )}
+            {showDeleteConfirm && (
+                <ConfirmationModal
+                    title="Delete Fertilizer"
+                    message="Are you sure you want to delete this fertilizer? This action cannot be undone."
+                    onConfirm={confirmDelete}
+                    onCancel={() => setShowDeleteConfirm(false)}
+                />
             )}
         </div>
     );
