@@ -10,13 +10,15 @@ export default function LoginBox() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const handleLogin = async () => {
+    const handleLogin = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         if (!email || !password) {
             alert('Please enter both email and password');
             return;
         }
-
+        setLoading(true);
         try {
             const response = await login({ email, password });
             const { user, access_token } = response.data;
@@ -40,6 +42,8 @@ export default function LoginBox() {
             } else {
                 alert('Something went wrong. Please try again.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -48,9 +52,9 @@ export default function LoginBox() {
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
             <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold text-center text-green-700 mb-6">আপনার অ্যাকাউন্টে লগইন করুন</h2>
-
-                {/* Email */}
-                <div className="mb-4">
+                <form onSubmit={handleLogin}>
+                    {/* Email */}
+                    <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-600 mb-1">ইমেল</label>
                     <input
                         type="email"
@@ -81,16 +85,17 @@ export default function LoginBox() {
                             <EyeIcon className="h-5 w-5" />
                         )}
                     </div>
-                </div>
+                    </div>
 
-                {/* Button */}
-                <button
-                    onClick={handleLogin}
-                    className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition font-semibold"
-                >
-                    Login
-                </button>
-
+                    {/* Button */}
+                    <button
+                        type="submit"
+                        className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition font-semibold"
+                        disabled={loading}
+                    >
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </form>
                 {/* Optional: Footer Links */}
                 <div className="text-sm text-center mt-4 text-gray-600">
                     Don’t have an account?{' '}
