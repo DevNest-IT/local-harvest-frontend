@@ -1,76 +1,78 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import pdfMake from 'pdfmake/build/pdfmake';
+import { font as hindSiliguriFont } from './HindSiliguri-Regular-normal';
+
+(pdfMake as any).vfs = {
+    "HindSiliguri-Regular.ttf": hindSiliguriFont
+};
+
+(pdfMake as any).fonts = {
+    HindSiliguri: {
+        normal: 'HindSiliguri-Regular.ttf',
+        bold: 'HindSiliguri-Regular.ttf',
+        italics: 'HindSiliguri-Regular.ttf',
+        bolditalics: 'HindSiliguri-Regular.ttf'
+    }
+};
 
 export const generateReceiptPdf = (sale: any, shop: any) => {
-    const doc = new jsPDF();
+    const docDefinition = {
+        content: [
+            { text: shop.shop_name, fontSize: 20, bold: true, font: 'HindSiliguri' },
+            { text: shop.address, fontSize: 10, font: 'HindSiliguri' },
+            { text: `Phone: ${shop.contact_number}`, fontSize: 10, margin: [0, 0, 0, 10], font: 'HindSiliguri' },
 
-    // Header
-    doc.setFontSize(20);
-    doc.text(shop.shop_name, 10, 20);
-    doc.setFontSize(10);
-    doc.text(shop.address, 10, 28);
-    doc.text(`Phone: ${shop.contact_number}`, 10, 34);
+            { text: `Receipt No: ${sale.receipt_no}`, alignment: 'right', font: 'HindSiliguri' },
+            { text: `Date: ${new Date(sale.created_at).toLocaleDateString()}`, alignment: 'right', font: 'HindSiliguri' },
 
-    // Receipt Details
-    doc.setFontSize(12);
-    doc.text(`Receipt No: ${sale.receipt_no}`, 150, 20);
-    doc.text(`Date: ${new Date(sale.created_at).toLocaleDateString()}`, 150, 28);
+            { text: 'Bill To:', bold: true, margin: [0, 10, 0, 0], font: 'HindSiliguri' },
+            { text: `Customer: ${sale.customer_name || 'N/A'}`, font: 'HindSiliguri' },
+            { text: `Phone: ${sale.customer_phone || 'N/A'}`, font: 'HindSiliguri' },
+            { text: `Salesperson: ${sale.salesperson_name || 'N/A'}`, alignment: 'right', font: 'HindSiliguri' },
 
-    // Customer Details
-    doc.setFontSize(12);
-    doc.text('Bill To:', 10, 50);
-    doc.setFontSize(10);
-    doc.text(`Customer: ${sale.customer_name || 'N/A'}`, 10, 56);
-    doc.text(`Phone: ${sale.customer_phone || 'N/A'}`, 10, 62);
+            {
+                table: {
+                    headerRows: 1,
+                    widths: ['*', '*', 'auto', 'auto', 'auto'],
+                    body: [
+                        ['Item', 'Category', 'Qty', 'Price', 'Subtotal'],
+                        ...sale.items.map((item: any) => [
+                            item.fertilizer.name,
+                            item.fertilizer.category,
+                            item.quantity,
+                            item.unit_price,
+                            item.subtotal
+                        ])
+                    ]
+                },
+                font: 'HindSiliguri',
+                margin: [0, 10, 0, 0]
+            },
 
-    // Salesperson
-    doc.setFontSize(10);
-    doc.text(`Salesperson: ${sale.salesperson_name || 'N/A'}`, 150, 56);
+            {
+                columns: [
+                    { width: '*', text: '' },
+                    {
+                        width: 'auto',
+                        table: {
+                            body: [
+                                ['Gross Amount:', sale.gross_amount],
+                                ['Discount:', `${sale.discount_percent}%`],
+                                [{ text: 'Net Amount:', bold: true }, { text: sale.net_amount, bold: true }]
+                            ]
+                        },
+                        layout: 'noBorders',
+                        font: 'HindSiliguri',
+                        margin: [0, 10, 0, 0]
+                    }
+                ]
+            },
 
+            { text: 'Thank you for your business!', alignment: 'center', margin: [0, 20, 0, 0], font: 'HindSiliguri' }
+        ],
+        defaultStyle: {
+            font: 'HindSiliguri'
+        }
+    };
 
-    // Items Table
-    const tableColumn = ["Item", "Category", "Qty", "Price", "Subtotal"];
-    const tableRows: any[] = [];
-
-    if (sale.items && Array.isArray(sale.items)) {
-        sale.items.forEach((item: any) => {
-            const itemData = [
-                item.fertilizer.name,
-                item.fertilizer.category,
-                item.quantity,
-                `${item.unit_price}`,
-                `${item.subtotal}`,
-            ];
-            tableRows.push(itemData);
-        });
-    }
-
-    autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 70,
-        theme: 'grid',
-        headStyles: { fillColor: [22, 160, 133] },
-    });
-
-    // Totals
-    const finalY = (doc as any).lastAutoTable.finalY || 70;
-    doc.setFontSize(10);
-    doc.text(`Gross Amount:`, 150, finalY + 10);
-    doc.text(`${sale.gross_amount}`, 180, finalY + 10);
-    doc.text(`Discount:`, 150, finalY + 16);
-    doc.text(`${sale.discount_percent}%`, 180, finalY + 16);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Net Amount:`, 150, finalY + 22);
-    doc.text(`${sale.net_amount}`, 180, finalY + 22);
-    doc.setFont('helvetica', 'normal');
-
-
-    // Footer
-    doc.setFontSize(10);
-    doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-
-
-    doc.save(`receipt-${sale.receipt_no}.pdf`);
+    pdfMake.createPdf(docDefinition as any).download(`receipt-${sale.receipt_no}.pdf`);
 };

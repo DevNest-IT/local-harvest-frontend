@@ -1,8 +1,10 @@
 'use client';
 import { X, Printer, Download } from 'lucide-react';
-import { generateReceiptPdf } from '../utils/pdfGenerator';
 import { useState, useEffect } from 'react';
 import { getShopProfile } from '@/app/services/api';
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
+import { ReceiptDocument } from './ReceiptDocument'; // The React-PDF component we discussed earlier
 
 export const SaleDetailsModal = ({ sale, onCancel }: { sale: any, onCancel: () => void }) => {
     const [downloading, setDownloading] = useState(false);
@@ -17,6 +19,17 @@ export const SaleDetailsModal = ({ sale, onCancel }: { sale: any, onCancel: () =
 
     if (!sale) return null;
 
+    // ✅ New Download Handler using React-PDF
+    const handleDownload = async () => {
+        if (shopProfile) {
+            setDownloading(true);
+            const blob = await pdf(<ReceiptDocument sale={sale} shop={shopProfile} />).toBlob();
+            saveAs(blob, `receipt-${sale.receipt_no}.pdf`);
+            setDownloading(false);
+        }
+    };
+
+    // Print logic remains the same (you can improve this later)
     const handlePrint = () => {
         const printContent = document.getElementById('receipt-content');
         const windowUrl = 'about:blank';
@@ -37,14 +50,6 @@ export const SaleDetailsModal = ({ sale, onCancel }: { sale: any, onCancel: () =
         }
     };
 
-    const handleDownload = () => {
-        if (shopProfile) {
-            setDownloading(true);
-            generateReceiptPdf(sale, shopProfile);
-            setDownloading(false);
-        }
-    };
-
     return (
         <div className="fixed inset-0 bg-[rgba(0,0,0,0.1)] flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
@@ -61,7 +66,7 @@ export const SaleDetailsModal = ({ sale, onCancel }: { sale: any, onCancel: () =
                     <p><strong>Phone:</strong> {sale.customer_phone || 'N/A'}</p>
                     <p><strong>Salesperson:</strong> {sale.salesperson_name || 'N/A'}</p>
                     <p><strong>Date:</strong> {new Date(sale.created_at).toLocaleString()}</p>
-                    
+
                     <table className="w-full mt-4">
                         <thead>
                             <tr>

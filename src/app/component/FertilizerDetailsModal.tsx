@@ -74,16 +74,20 @@ export const FertilizerDetailsModal = ({ fertilizerId, onCancel }: { fertilizerI
                                     <h3 className="text-2xl font-bold mb-4">Available at Local Shops</h3>
                                     <div className="space-y-4" style={{ maxHeight: 'calc(90vh - 400px)', overflowY: 'auto' }}>
                                         {data.shops.map((shop: any) => (
-                                            <div key={shop.shop_name} className="bg-white rounded-lg shadow-md p-4">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="font-bold text-lg">{shop.shop_name}</h4>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStockColor(shop.stock_status)}`}>
-                                                        {shop.stock_status.replace('_', ' ')}
-                                                    </span>
+                                            <div key={shop.shop_name} className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4">
+                                                <img src={shop.owner_picture_url || '/farmer.png'} alt={shop.owner_name} className="w-16 h-16 rounded-full object-cover" />
+                                                <div className="flex-grow">
+                                                    <div className="flex items-center justify-between">
+                                                        <h4 className="font-bold text-lg">{shop.shop_name}</h4>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStockColor(shop.stock_status)}`}>
+                                                            {shop.stock_status.replace('_', ' ')}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">{shop.owner_name}</p>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1"><MapPin size={12} /> {shop.address}</p>
+                                                    <a href={`tel:${shop.contact_number}`} className="text-sm text-blue-600 flex items-center gap-1"><Phone size={12} /> {shop.contact_number}</a>
                                                 </div>
-                                                <p className="text-sm text-gray-500 flex items-center gap-1 mt-2"><MapPin size={12} /> {shop.address}</p>
-                                                <a href={`tel:${shop.contact_number}`} className="text-sm text-blue-600 flex items-center gap-1 mt-1"><Phone size={12} /> {shop.contact_number}</a>
-                                                <div className="flex justify-between items-center mt-2">
+                                                <div className="text-right">
                                                     <p className="text-lg font-bold">৳{shop.price_per_unit}/kg</p>
                                                     <p className="text-sm text-gray-500">{shop.stock_quantity} kg available</p>
                                                 </div>

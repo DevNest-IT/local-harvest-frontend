@@ -5,8 +5,21 @@ import { Plus, Eye, Download, Printer } from 'lucide-react';
 import { generateReceiptPdf } from '../utils/pdfGenerator';
 import { CreateSaleModal } from './CreateSaleModal';
 import { SaleDetailsModal } from './SaleDetailsModal';
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
+import { ReceiptDocument } from './ReceiptDocument'; 
+
 
 export const Sales = () => {
+
+    const handleDownload = async (sale: any) => {
+        if (shopProfile) {
+            const blob = await pdf(<ReceiptDocument sale={sale} shop={shopProfile} />).toBlob();
+            saveAs(blob, `receipt-${sale.receipt_no}.pdf`);
+        }
+    };
+
+
     const [sales, setSales] = useState<any[]>([]);
     const [pagination, setPagination] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -107,9 +120,10 @@ export const Sales = () => {
                             <button onClick={() => handleViewDetails(sale)} className="text-gray-500 hover:text-indigo-600">
                                 <Eye size={20} />
                             </button>
-                            <button onClick={() => shopProfile && generateReceiptPdf(sale, shopProfile)} className="text-gray-500 hover:text-indigo-600" disabled={!shopProfile}>
+                            <button onClick={() => handleDownload(sale)} className="text-gray-500 hover:text-indigo-600" disabled={!shopProfile}>
                                 <Download size={20} />
                             </button>
+
                             <button onClick={() => window.print()} className="text-gray-500 hover:text-indigo-600">
                                 <Printer size={20} />
                             </button>
