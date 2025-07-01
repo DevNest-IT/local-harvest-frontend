@@ -8,56 +8,149 @@ Font.register({
     src: '/fonts/HindSiliguri-Regular.ttf'
 });
 
+// PDF Styles
 const styles = StyleSheet.create({
-    page: { padding: 30, fontFamily: 'HindSiliguri' },
-    section: { marginBottom: 10 },
-    header: { fontSize: 20, textAlign: 'center', marginBottom: 20 },
-    tableHeader: { fontSize: 12, marginBottom: 5, fontWeight: 'bold' },
-    row: { flexDirection: 'row', marginBottom: 5 },
-    cell: { flex: 1, fontSize: 10 },
-    footer: { marginTop: 20, textAlign: 'center' }
+    page: {
+        padding: 40,
+        fontFamily: 'HindSiliguri',
+        fontSize: 10,
+        lineHeight: 1.5
+    },
+    header: {
+        textAlign: 'center',
+        marginBottom: 10
+    },
+    shopName: {
+        fontSize: 24,
+        fontWeight: 'bold'
+    },
+    shopAddress: {
+        fontSize: 12,
+        marginTop: 15
+    },
+    divider: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+        marginVertical: 10,
+        marginBottom: 20
+    },
+    section: {
+        marginBottom: 10
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 4
+    },
+    tableRow: {
+        flexDirection: 'row',
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#ddd',
+        paddingVertical: 4
+    },
+    tableCellHeader: {
+        flex: 1,
+        fontWeight: 'bold',
+        textAlign: 'center'
+    },
+    tableCell: {
+        flex: 1,
+        textAlign: 'center'
+    },
+    totals: {
+        marginTop: 15,
+        alignSelf: 'flex-end',
+        width: '50%'
+    },
+    totalsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5
+    },
+    totalsRowBold: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+        fontWeight: 'bold'
+    },
+    footer: {
+        marginTop: 30,
+        textAlign: 'center',
+        fontSize: 12
+    }
 });
 
+// React-PDF Component
 export const ReceiptDocument = ({ sale, shop }: { sale: any, shop: any }) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <Text style={styles.header}>{shop.shop_name}</Text>
-            <Text style={styles.section}>{shop.address}</Text>
-            <Text style={styles.section}>Phone: {shop.contact_number}</Text>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.shopName}>{shop.shop_name}</Text>
+                <Text style={styles.shopAddress}>{shop.address}</Text>
+                <Text style={styles.shopAddress}>Phone: {shop.contact_number}</Text>
+            </View>
+            <View style={styles.divider} />
 
-            <Text style={styles.section}>Receipt No: {sale.receipt_no}</Text>
-            <Text style={styles.section}>Date: {new Date(sale.created_at).toLocaleDateString()}</Text>
-
-            <Text style={styles.section}>Bill To: {sale.customer_name || 'N/A'}</Text>
-            <Text style={styles.section}>Phone: {sale.customer_phone || 'N/A'}</Text>
-            <Text style={styles.section}>Salesperson: {sale.salesperson_name || 'N/A'}</Text>
+            {/* Sale Info */}
+            <View style={styles.section}>
+                <View style={styles.infoRow}>
+                    <Text>Receipt No: {sale.receipt_no}</Text>
+                    <Text>Date: {new Date(sale.created_at).toLocaleDateString()}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                    <Text>Customer: {sale.customer_name || 'N/A'}</Text>
+                    <Text>Phone: {sale.customer_phone || 'N/A'}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                    <Text>Salesperson: {sale.salesperson_name || 'N/A'}</Text>
+                </View>
+            </View>
 
             {/* Table Header */}
-            <View style={[styles.row, { borderBottom: '1px solid black', marginBottom: 5 }]}>
-                <Text style={styles.cell}>Item</Text>
-                <Text style={styles.cell}>Category</Text>
-                <Text style={styles.cell}>Qty</Text>
-                <Text style={styles.cell}>Price</Text>
-                <Text style={styles.cell}>Subtotal</Text>
+            <View style={styles.tableHeader}>
+                <Text style={styles.tableCellHeader}>Item</Text>
+                <Text style={styles.tableCellHeader}>Category</Text>
+                <Text style={styles.tableCellHeader}>Qty</Text>
+                <Text style={styles.tableCellHeader}>Price</Text>
+                <Text style={styles.tableCellHeader}>Subtotal</Text>
             </View>
 
             {/* Table Rows */}
             {sale.items.map((item: any, index: number) => (
-                <View style={styles.row} key={index}>
-                    <Text style={styles.cell}>{item.fertilizer.name}</Text>
-                    <Text style={styles.cell}>{item.fertilizer.category}</Text>
-                    <Text style={styles.cell}>{item.quantity}</Text>
-                    <Text style={styles.cell}>{item.unit_price}</Text>
-                    <Text style={styles.cell}>{item.subtotal}</Text>
+                <View style={styles.tableRow} key={index}>
+                    <Text style={styles.tableCell}>{item.fertilizer.name}</Text>
+                    <Text style={styles.tableCell}>{item.fertilizer.category}</Text>
+                    <Text style={styles.tableCell}>{item.quantity}</Text>
+                    <Text style={styles.tableCell}>{item.unit_price}</Text>
+                    <Text style={styles.tableCell}>{item.subtotal}</Text>
                 </View>
             ))}
 
-            <View style={{ marginTop: 10 }}>
-                <Text>Gross Amount: {sale.gross_amount}</Text>
-                <Text>Discount: {sale.discount_percent}%</Text>
-                <Text>Net Amount: {sale.net_amount}</Text>
+            {/* Totals */}
+            <View style={styles.totals}>
+                <View style={styles.totalsRow}>
+                    <Text>Gross Amount:</Text>
+                    <Text>{sale.gross_amount}</Text>
+                </View>
+                <View style={styles.totalsRow}>
+                    <Text>Discount:</Text>
+                    <Text>{sale.discount_percent}%</Text>
+                </View>
+                <View style={styles.totalsRowBold}>
+                    <Text>Net Amount:</Text>
+                    <Text>{sale.net_amount}</Text>
+                </View>
             </View>
 
+            {/* Footer */}
             <Text style={styles.footer}>Thank you for your business!</Text>
         </Page>
     </Document>
