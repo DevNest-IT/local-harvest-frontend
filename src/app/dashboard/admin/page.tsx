@@ -8,7 +8,7 @@ import { CreateUserForm } from './components/CreateUserForm';
 import { PlaceholderContent } from './components/PlaceholderContent';
 import { DashboardOverview } from './components/DashboardOverview';
 import { FertilizerControl } from './components/FertilizerControl';
-import { ShopControl } from './components/ShopControl';
+import { ShopControl } from './components/Shopcontrol';
 import { Reports } from './components/Reports';
 
 export default function AdminDashboard() {
