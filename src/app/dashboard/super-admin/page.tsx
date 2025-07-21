@@ -1,0 +1,75 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/app/services/api';
+import { SuperAdminSidebar } from './components/SuperAdminSidebar';
+import { SuperAdminHeader } from './components/SuperAdminHeader';
+import { DashboardOverview } from './components/DashboardOverview';
+import { CreateAdminForm } from './components/CreateAdminForm';
+import { AdminControl } from './components/AdminControl';
+import { Reports } from './components/Reports';
+
+export default function SuperAdminDashboard() {
+    const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    const [activeView, setActiveView] = useState('dashboard');
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            if (parsedUser.role === 'super-admin') {
+                setUser(parsedUser);
+            } else {
+                router.push('/dashboard/login');
+            }
+        } else {
+            router.push('/dashboard/login');
+        }
+    }, [router]);
+
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await logout(token);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/dashboard/login');
+    };
+
+    const renderContent = () => {
+        switch (activeView) {
+            case 'dashboard':
+                return <DashboardOverview />;
+            case 'create-admin':
+                return <CreateAdminForm />;
+            case 'admin-control':
+                return <AdminControl />;
+            case 'reports':
+                return <Reports />;
+            default:
+                return <DashboardOverview />;
+        }
+    };
+
+    if (!user) {
+        return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>;
+    }
+
+    return (
+        <div className="min-h-screen flex bg-gray-50">
+            <SuperAdminSidebar activeView={activeView} setActiveView={setActiveView} handleLogout={handleLogout} />
+            <div className="flex-1 flex flex-col" style={{ height: '100vh' }}>
+                <SuperAdminHeader user={user} />
+                <main className="flex-1 p-8 overflow-y-auto">
+                    {renderContent()}
+                </main>
+            </div>
+        </div>
+    );
+}
